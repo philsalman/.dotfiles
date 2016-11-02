@@ -1,0 +1,15 @@
+MASTER-JCAII-2016-09-20.pub    aim-web/all aim-front/all aadts/all sentry gtaa hub
+MASTER-NETQUITY-2016-09-20.pub nap/all ci registry
+icedei-sep                     web@aim-web/prod
+iceprod-sep                    admin@aa
+import-training@aim-web        web@apiprod
+aim@ip-172-31-30-134           web@apitraining
+deploy@aim-web                 web@apitraining
+anishchuk.ia@gmail.com         all/all
+alex@netquity.com              all/all
+rschan@netquity.com            aim-web/all
+rcorbit@gmail.com              web@aim-web/all aim-front/all
+meghan@netquity.com            aim-front/dev aim-web/dev
+millioner.bbb@gmail.com        aim-web/all aim-front/dev fronttraining hub gtaa
+phil@netquity.com              aim-web/dev aim-front/dev web@aadts/all web@mfe/all web@aim-flatstrip/all aim-summary/dev hub gtaa sumdei sumpho napdei nappho
+liza                           web@aadts/all web@aim-web/dev web@apitraining web@aim-summary/dev web@aim-front/dev web@aadev web@nap/dev web@gtaa web@hub

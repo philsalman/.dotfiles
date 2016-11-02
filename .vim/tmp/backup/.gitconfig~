@@ -1,0 +1,7 @@
+[commit]
+	gpgsign = true
+[user]
+	signingkey = 5BE3453EB97E701F20E544FBF4F7A498DD2B74F2
+	email = phil@netquity.com
+[core]
+	editor = /usr/local/bin/vim

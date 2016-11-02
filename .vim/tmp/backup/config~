@@ -1,0 +1,54 @@
+Host apidei
+    Hostname 54.86.188.244
+Host apipho
+    Hostname 52.4.214.60
+Host apiprod
+    Hostname 52.200.159.180
+Host apitraining
+    Hostname 52.44.185.227
+
+Host sumdei
+    Hostname 54.172.235.117
+Host sumpho
+    Hostname 54.197.19.101
+
+Host ci
+    Hostname 52.4.137.44
+Host sentry
+    Hostname 52.44.161.93
+Host liza
+    Hostname 54.164.129.154
+Host registry
+    Hostname 54.209.250.210
+
+
+Host gtaa
+    Hostname 54.234.171.255
+Host hub
+    Hostname 54.86.109.118
+
+Host napprod
+    Hostname 54.83.10.70
+Host naptraining
+    Hostname 184.73.3.41
+Host nappho
+    Hostname 54.157.235.235
+Host napdei
+    Hostname 54.144.233.132
+
+Host frontdeimos
+    Hostname 52.4.16.186
+Host frontphobos
+    Hostname 52.3.30.101
+Host frontprod
+    Hostname 52.44.186.45
+Host fronttraining
+    Hostname 52.4.53.16
+
+Host aa
+    Hostname aa.icelinkapp.com
+Host aadev
+    Hostname ual.icelinkapp.com
+
+Host assistia
+    Hostname 54.174.170.31

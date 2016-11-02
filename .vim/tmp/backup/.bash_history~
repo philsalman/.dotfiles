@@ -1,0 +1,500 @@
+git commit -m "AIMWEB-1557 Refactored testcases and keywords; finshed aimweb keyword file structure. :)"
+ssh web@apipho
+ssh web@frontphobos
+ssh web@apidei
+fabfile
+vim host-apidei/secrets 
+fab -H apidei branch:develop deploy
+fab -H apidei branch:develop pull:AIMWEB-1695_deicer_dispatcher_truck_visibility deploy
+fab -H frontdeimos branch:develop deploy
+cd resources/keywords/deicer/
+mkdir vehicle/
+mkdir crews/
+mkdir volume/
+rm volume/
+rmdir volume/
+mkdir fluids/
+rmdir fluids/
+rm crews/
+rmdir crews/
+cd  vehicle/
+mkdir deicing/
+mkdir crews/
+mkdir ops_guide
+mkdir support
+cd ..
+cd ..
+rm -r deicer/
+mkdir deicer
+cd deicer/
+mkdir vehicles
+mkdir deicing
+mkdir ops_guide
+mkdir support
+mkdir crews
+mkdir setup
+mkdir teardown
+man make
+man nano
+pico setup/setup.robot
+git stash
+git stash list
+git stash pop
+git stash list
+git status
+git add .
+git status
+cd ..
+cd ..
+git status
+git add .
+cd 
+front-end
+cd ui_testing/resources/
+git status
+cd ..
+git status
+open .
+git status
+git add .
+git commit -m "AIMWEB-1557 Divided the keywords files into categories of keywords related to the model/view."
+git push origin UI_testing
+git status
+git checkout -f -q -B develop origin/develop
+git checkout UI_testing
+front-end
+fab -H frontdeimos branch:develop deploy
+back-end
+git status
+git pull origin develop
+git status
+git fetch -f
+git pull origin develop
+git pull origin AIMWEB-1739_add_quadrants_to_firebase
+git status
+git status
+git push origin develop
+fab -H apipho branch:develop deply
+fab -H apipho branch:develop deploy
+git status
+git fetch -f
+git pull origin develop
+git pull origin AIMWEB-1599_forgot_password_api
+git status
+git add .
+git commit -m "Merged AIMWEB-1599 to develop."
+git statuys
+git status
+git push origin develop
+ssh web@gtaa
+flatstrip 
+git status
+git fetch -f
+git pull origin master
+git status
+git pull origin AIMWEB-1611_django_upgrade
+git status
+git add -p
+git commit -m "Merged AIMWEB-1611_django_upgrade branch to master branch."
+git status
+git push origin master
+cd
+ssh web@apidei
+ssh web@apidei
+back-end
+git fetch -f
+git status
+git pull origin develop
+git status
+git pull origin update_boto
+git status
+git commit -m  "Merged update_boto branch to develop branch."
+git status
+git push origin develop
+vim .bash_profile
+ssh web@apidei
+ssh web@hub
+ssh web@gtaa
+gtaa
+ll
+vim .bash_profile
+vim .vimrc
+fabfile
+git pull origin master
+git statys
+git status
+vim ./host-apidei/secrets 
+ssh web@apidei
+ssh web@apidei
+ssh web@frontdeimos
+vim .ssh/config 
+ssh web@frontdeimos
+ssh web@frontphobos
+ssh web@apidei
+vim .ssh/known_hosts 
+ssh web@apidei
+ssh web@apidei
+ssh web@apidei 
+ssh web@apipho
+ssh web@frontdeimos
+ssh web@frontdeimos
+ssh web@apidei
+ssh web@sumdei
+ssh web@apidei
+git status
+git checkout UI_testing
+git stash pop
+curl -u jcaiiuser4:184cfc31-4052-44e3-b13b-516b0ff2f147 -X POST -H "Content-Type: application/octet-stream" https://saucelabs.com/rest/v1/storage/jcaiiuser4/DeicerDeimos.zip?overwrite=true --data-binary @/Users/davidsalman/Documents/JCAII/aim-front/ui_testing/resources/deicer_app/DeicerDeimos.zip
+curl -u jcaiiuser4:184cfc31-4052-44e3-b13b-516b0ff2f147 https://saucelabs.com/rest/v1/storage/jcaiiuser4
+git stauts
+git status
+git add .
+git status
+git commit -m "AIMWEB-1717: updated sauce reporting structure."
+git status
+robot -d output/ tests/deicer/mobile_test_cases.robot 
+robot -d output/ tests/deicer/mobile_test_cases.robot 
+robot -d output/ tests/deicer/mobile_test_cases.robot 
+cd resources/keywords/deicer/teardown/
+front-end
+cd ui_testing/
+git status
+git status
+git stash
+git checkout UI_testing
+git stash pop
+robot -d output/ tests/deicer/mobile_test_cases.robot 
+robot -d output/ tests/deicer/mobile_test_cases.robot 
+robot -d output/ tests/deicer/mobile_test_cases.robot 
+robot -d output/ tests/deicer/mobile_test_cases.robot 
+robot -d output/ tests/deicer/mobile_test_cases.robot 
+robot -d output/ tests/deicer/mobile_test_cases.robot 
+robot -d output/ tests/deicer/mobile_test_cases.robot 
+test "$?BASH_VERSION" = "0" || eval 'setenv() { export "$1=$2"; }';                setenv PATH "/Applications/Wine Devel.app/Contents/Resources/start/bin:/Applications/Wine Devel.app/Contents/Resources/wine/bin:$PATH"; winehelp --clear
+wine /Users/davidsalman/Downloads/JVector.jar 
+cd Downloads/
+ll
+chmod +x JVector.jar
+ll
+ssh web@frontphobos
+ssh web@frontdeimos
+ssh web@spidei
+ssh web@apidei
+ssh web@apipho
+ssh web@frontdeimos
+ssh web@sumpho
+sudo gem install sass
+sudo gem install compass
+sass -v
+compass -v
+front-end
+git status
+git stash
+git checkout -f -q -B develop origin develop
+git checkout -f -q -B develop origin/develop
+git status
+git fetch -f
+git status
+git pull origin develop
+git status
+ENV=develop npm install
+git status
+git checkout -f -q -B develop origin/develop
+gi tstatus
+git status
+ssh web@frontphobos
+git stats
+git status
+git status
+fab -H apipho branch:develop pull:AIMWEB-1757_tsi_data_fix deploy
+git status
+fab -H frontdeimos branch:master pull:HOTFIX_flight_schedule_filtering deploy
+git status
+git stash
+git checkout -f -q -B develop origin/develop
+git status
+git fetch -f
+git status
+git pull origin develop
+git status
+git add .
+git status
+git rm .
+git -r rm .
+git rm -r .
+git status
+git rm -r -f .
+git status
+git merge --no-ff sentry_sourcemaps_master
+git merge --no-ff origin/sentry_sourcemaps_master
+git status
+git add .
+git status
+git push origin develop
+git add .
+git commit -m "Merged Sentry sourcemaps master to develop."
+git status
+git push origin develop
+history
+git status
+git status
+git fetch -f
+git merge --no-ff origin/develop
+git merge --no-ff origin/AIMFRONT-7_fix_firebase_crews_error
+git status
+git commit -m "Merged AIMFRONT-7 Fix firebase crew error to develop."
+git push origin develop
+history
+git status
+git status
+git reflog
+git fetch -f
+git reflog
+git status
+git checkout -f -q -B master origin/master
+git status
+git reflog
+exit
+ssh web@sumdei
+back-end
+ssh web@apipho
+git status
+git fetch -f
+git status
+git pull origin develop
+git staus
+git status
+git checkout AIMWEB-1520_cl_volumes
+git status
+git fetch -f
+git pull origin AIMWEB-1520_cl_volumes
+git pull origin develop
+git status
+vim src/dashboard/reports/views.py 
+git status
+git add -m "AIMWEB-1520: Merged develop to AIMWEB-1520_cl_volumes."
+git commit -a "AIMWEB-1520: Merged develop to AIMWEB-1520_cl_volumes."
+git add .
+git status
+git commit -m "AIMWEB-1520: Merged develop to AIMWEB-1520_cl_volumes."
+git status
+git push origin AIMWEB-1520_cl_volumes
+git status
+git checkout -f -q -B develop origin develop
+git checkout -f -q -B develop origin/develop
+git status
+fab -H frontphobos branch:develop deploy
+fab -H apidei branch:master deploy
+git status
+git fetch -p
+git status
+git merge --no-ff origin/develop
+git commit
+git commit
+git commit -F
+git commit
+git status
+git commit -a 
+git commit -m "Merged AIMWEB-1705 to develop"
+git status
+git merge --no-ff origin/AIMWEB-1705_summary_oauth
+git status
+git commit -m "Merged AIMWEB-1705 to develop branch."
+git status
+git push origin develop
+git stauts
+git status
+git pull origin develop
+git merge --no-ff origin/AIMWEB-1780_firebase_connection_error_fix
+git status
+git commit -m "Merged origin/AIMWEB-1780_firebase_connection_error_fix to origin/develop."
+git status
+git push origin develop
+git status
+git pull origin develop
+git status
+git merge --no-ff origin/AIMFRONT-2_fix_service_location_property 
+git status
+git commit -m "Merged origin/AIMFRONT-2_fix_service_location_property to origin/develop."
+git status
+git push origin develop
+git reflog
+git reflog
+git status
+git checkout -f -q -B develop origin/develop
+git status
+git fetch -p
+git reflog
+git merge --no-ff origin/AIMWEB-1709_svg_images_uploading_fix
+git commit -m "Merged origin/AIMWEB-1709_svg_images_uploading_fix to origin/develop"
+git status
+git push origin develop
+ssh web@apidei
+ssh web@apitriaing
+ssh web@apitraining
+fabfile
+git fetch -f
+git checkout -f -q -B master origin/master
+git pull origin master
+cat host-sumtraining/secrets
+grep -i supported_source host-*/secrets -B 3 -A 3
+ssh web@sumdei
+ssh ubuntu@sumdei
+ssh ubuntu@sumphi
+ssh ubuntu@sumpho
+git status
+git pull origin master
+git status
+ssh web@sumdei
+ssh web@frontdeimos
+ssh web@apidei
+git status
+git fetch -f
+git status
+git merge --no-ff origin master
+git status
+git add .
+git rm .DS_Store 
+git rm -f .DS_Store 
+git rm -f deimos_db_dump.backup 
+git rm -f phobos_db_dump.backup 
+git status
+git add hostslist.py
+git commit -m "Merged origin/master to master"
+git status
+ssh web@sumdei
+git status
+git checkout -f -q -B master origin/master
+git status
+git fetch -p
+git fetch -f
+git merge --no-ff origin/master
+ssh web@apidei
+ssh web@frontdeimos
+git statis
+git status
+ssh web@fronttraining
+ssh web@apitraining
+summary
+git status
+git fetch -p
+git status
+git pull origin develop
+git status
+git merge --no-ff origin/AIMWEB-1705_summary_oauth
+git status
+git commit -m "Merged origin/AIMWEB-1705_summary_oauth to develop branch."
+git status
+git push origin develop
+git status
+summary
+git status
+git fetch -f
+git status
+git pull origin master
+git status
+git pull origin AIMWEB-1575_django_upgrade
+git status
+git push origin master
+git status
+git status
+git fetch -f
+git pull origin master
+git checkout -f -q -B develop origin/develop
+git status
+git fetch -f
+git merge --no-ff origin develop
+git status
+git fetch -f
+git merge --no-ff origin develop
+git merge --no-ff origin AIMWEB-1575_django_upgrade
+git merge --no-ff origin/AIMWEB-1575_django_upgrade
+git status
+git add .
+git commit -m "Merged AIMWEB-1575 Django upgrade PR to origin/develop."
+git status
+git push origin develop
+mfe
+cd ..
+ll
+cd ManualEntry/
+git status
+git fetch -f
+git status
+git pull origin develop
+git merge --no-ff origin/AIMWEB-1612_django_upgrade
+git status
+git add .
+git commit -m "Merged AIMWEB-1612_django_upgrade to origin/develop"
+git status
+fab -H hub branch:develop pull:AIMWEB-1612_django_upgrade deploy
+ssh web@frontdeimos
+ssh web@apidei
+key
+git status
+vim permissions_list 
+fab -H apitraining keymaster.sync
+fab -i /Users/davidsalman/Documents/Netquity/Personal\ Work/jcaii-Sept16-2015.pem -H apitraining keymaster.sync
+fab -i /Users/davidsalman/Documents/Netquity/Personal\ Work/Netquity-Sept16-2015.pem -H apitraining keymaster.sync
+ssh web@frontdeimos
+ssh web@apidei
+ssh web@sumdei
+ssh web@sumdei
+git status
+git fetch -p
+git status
+git pull origin master
+git stash
+git status
+git pull origin master
+git status
+vim permissions_list 
+git status
+flatstrip
+git status
+git pull origin develoo
+git pull origin develop
+git status
+git stash
+git checkout -f -q -B master origin/master
+git status
+git checkout -f -q -B develop origin/develop
+git status
+git fetch -p
+git status
+git pull origin develop
+git merge --no-ff origin/AIMWEB-1705_summary_oauth
+git status
+git commit -m "Merged origin/AIMWEB-1705_summary_oauth to develop branch."
+git status
+git push origin develop
+history
+git status
+ssh web@apidei
+git config --global core.editor $(which vim)
+which vim
+ssh web@apidie
+ssh web@apidei
+front
+front-end
+git checkout -f -q -B develop origin/develop
+git status
+git fetch -p
+git merge --no-ff origin/develop
+git merge --no-ff origin/AIMFRO-12_fix_autopopulate_aircraft_reg
+git status
+git push origin develop
+ssh web@sumdei
+git status
+pybot -d output/ tests/aimweb/web_test_cases.robot 
+git status
+git add .
+git commit -m "AIMWEB-1718: Jenkins reporting for SauceLabs is complete."
+git status
+git push origin UI_testing
+pybot -d output/ tests/aimweb/web_test_cases.robot 
+git status
+pico .gitignore
+git status
+git add .gitignore
+git status

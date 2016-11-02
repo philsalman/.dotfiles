@@ -1,0 +1,461 @@
+"""
+Host-specific settings for fabfile.
+
+Here we define settings that go to env for each host.
+We use "groups" to avoid repeating some settings.
+Currently we have three kinds of groups: project, type, and domain.
+It's only a matter of convenience, names are arbitrary.
+Groups can override each other's settings and the host settings
+can override them all. No way to delete anything though, not yet.
+"""
+# TODO: Do we need roles? We can generate them using HOSTGROUPS.
+# hosts -> groups connections
+HOSTGROUPS = {
+    'apidei': ['project:aim-web', 'type:dev', 'domain:icelinkapp'],
+    'apipho': ['project:aim-web', 'type:dev', 'domain:icelinkapp'],
+    'apiprod': ['project:aim-web', 'type:prod', 'domain:icelinkapp'],
+    'apitraining': ['project:aim-web', 'type:prod', 'domain:icelinkapp'],
+    'aadev': ['project:aadts', 'type:dev', 'domain:icelinkapp'],
+    'aa': ['project:aadts', 'type:prod', 'domain:icelinkapp'],
+    'frontdeimos': ['project:aim-front', 'type:dev', 'domain:icelinkapp'],
+    'frontphobos': ['project:aim-front', 'type:dev', 'domain:icelinkapp'],
+    'frontprod': ['project:aim-front', 'type:prod', 'domain:icelinkapp'],
+    'fronttraining': ['project:aim-front', 'type:prod', 'domain:icelinkapp'],
+    'sumdei': ['project:aim-summary', 'type:dev', 'domain:icelinkapp'],
+    'sumpho': ['project:aim-summary', 'type:dev', 'domain:icelinkapp'],
+    'gtaa': ['project:aim-flatstrip', 'type:prod', 'domain:icelinkapp'],
+    'hub': ['project:mfe', 'type:prod', 'domain:icelinkhub'],
+    'napprod': ['type:prod', 'domain:netquity', 'project:nap'],
+    'naptraining': ['type:prod', 'domain:netquity', 'project:nap'],
+    'nappho': ['type:dev', 'domain:netquity', 'project:nap'],
+    'napdei': ['type:dev', 'domain:netquity', 'project:nap'],
+    'ci': ['project:infra'],
+    'sentry': ['project:sentry', 'type:prod', 'domain:icelinkapp'],
+    'liza': ['project:infra'],
+    'registry': ['project:registry', 'type:prod', 'domain:netquity'],
+}
+# Per-host settings
+HOSTS = {
+    'apidei': {
+        'fqdn': 'apidei.icelinkapp.com',
+    },
+    'apipho': {
+        'fqdn': 'apipho.icelinkapp.com',
+    },
+    'apiprod': {
+        'fqdn': 'apiprod.icelinkapp.com',
+    },
+    'apitraining': {
+        'fqdn': 'apitraining.icelinkapp.com',
+        'extra_ssh_keys': ['training'],
+    },
+    'aadev': {
+        'fqdn': 'ual.icelinkapp.com',
+        'local_postgres': True,
+    },
+    'aa': {
+        'fqdn': 'aa.icelinkapp.com',
+        'web_user': 'aa',  # TODO: remove when new server is set up
+    },
+    'frontdeimos': {
+        'fqdn': 'deimos.icelinkapp.com',
+        'host_codename': 'deimos',
+    },
+    'frontphobos': {
+        'fqdn': 'phobos.icelinkapp.com',
+        'host_codename': 'phobos',
+    },
+    'frontprod': {
+        'fqdn': 'icelinkapp.com',
+        'host_codename': 'production',
+    },
+    'fronttraining': {
+        'fqdn': 'training.icelinkapp.com',
+        'host_codename': 'training',
+    },
+    'sumdei': {
+        'fqdn': 'sumdei.icelinkapp.com',
+    },
+    'sumpho': {
+        'fqdn': 'sumpho.icelinkapp.com',
+    },
+    'gtaa': {
+        'fqdn': 'gtaa.icelinkapp.com',
+        'local_postgres': True,
+    },
+    'hub': {
+        'fqdn': 'icelinkhub.com',
+        'local_postgres': True,
+    },
+    'registry': {
+        'fqdn': 'registry.netquity.com',
+    },
+    'napdei': {
+<<<<<<< HEAD
+        'web_user': None,  # TODO: remove when new server is set up
+        'old_nginx': True,  # TODO: remove after upgrade
+        'local_postgres': False,  # enable to setup databases on bootstrap
+        'fqdn': 'nappho.netquity.com',
+=======
+        'local_postgres': True,
+        'fqdn': 'napdei.netquity.com',
+>>>>>>> e750bf4c544efa89f75da2d0e5adba6a318ac213
+    },
+    'nappho': {
+        'old_nginx': True,  # TODO: remove after upgrade
+        'local_postgres': False,  # enable to setup databases on bootstrap
+        'fqdn': 'nappho.netquity.com',
+    },
+    'naptraining': {
+        'web_user': None,  # TODO: remove when new server is set up
+        'old_nginx': True,  # TODO: remove after upgrade
+<<<<<<< HEAD
+        'fqdn': 'nappho.netquity.com',
+=======
+        'fqdn': 'naptraining.netquity.com',
+>>>>>>> e750bf4c544efa89f75da2d0e5adba6a318ac213
+    },
+    'napprod': {
+        'web_user': None,  # TODO: remove when new server is set up
+        'old_nginx': True,  # TODO: remove after upgrade
+<<<<<<< HEAD
+        'fqdn': 'nappho.netquity.com',
+=======
+        'fqdn': 'napprod.netquity.com',
+>>>>>>> e750bf4c544efa89f75da2d0e5adba6a318ac213
+    },
+}
+# Host group settings
+GROUPS = {
+    'project:aim-web': {
+        'git_host': 'git@github.com',
+        'git_repo': 'JCAII/aim-web.git',
+        'ssh_project': 'aim-web',
+        'python_version': 'python2.7',
+        'deploy_method': 'django',
+        'server': 'gunicorn',
+        'django_settings_module': 'aim.settings.production',
+        'apps_path': 'src/',
+        'project_module': 'aim',
+        'unmigrate': True,
+        'backup_state': True,
+        'enable_media_dir': True,
+        'shell_env': {
+            'DJANGO_SETTINGS_MODULE': 'aim.settings.production',
+            'TERM': 'xterm',
+        },
+        'managed_processes': [
+            'webapp', 'webapp-worker', 'webapp-beat',
+        ],
+        'requirements': [
+            'nginx', 'git', 'ntp',
+            'redis-server', 'postgresql-client-9.4',
+            'python-all-dev', 'python-virtualenv',
+            'libxml2-dev', 'libxslt1-dev', 'libjpeg-dev', 'libpq-dev',
+            'libffi-dev',
+        ],
+        'extra_requirements': [
+            'postgres', 'supervisor', 'python'
+        ],
+        'vars_required': [
+            'GET_AIRPORTS_METAR',
+            'FIREBASE_URL', 'FIREBASE_SECRET',
+            'ICELINK_TO_SUMMARY_USERNAME', 'ICELINK_TO_SUMMARY_PASSWORD',
+            'SUMMARY_DOMAIN', 'SUMMARY_TO_ICELINK_USERNAME', 'SUMMARY_TO_ICELINK_PASSWORD', 'SUMMARY_TO_ICELINK_TOKEN',
+            'SECRET_KEY', 'DJANGO_SETTINGS_MODULE',
+            'DATABASE_NAME', 'DATABASE_HOST', 'DATABASE_PORT',
+            'DATABASE_USER', 'DATABASE_PASSWORD',
+        ],
+    },
+    'project:aadts': {
+        'git_host': 'git@github.com',
+        'git_repo': 'JCAII/aa-dts.git',
+        'ssh_project': 'aadts',
+        'python_version': 'python3.4',
+        'deploy_method': 'django',
+        'server': 'gunicorn',
+        'django_settings_module': 'aadts.settings',
+        'apps_path': '',
+        'project_module': 'aadts',
+        'unmigrate': False,
+        'backup_state': False,
+        'shell_env': {
+            'DJANGO_SETTINGS_MODULE': 'aadts.settings',
+            'TERM': 'xterm',
+        },
+        'managed_processes': [
+            'webapp', 'webapp-worker', 'webapp-beat', 'webapp-longpoll',
+        ],
+        'requirements': [
+            'nginx', 'git', 'ntp',
+            'redis-server', 'postgresql-client-9.4',
+            'python3-all-dev', 'python-virtualenv',
+            'libxml2-dev', 'libxslt1-dev', 'libjpeg-dev', 'libpq-dev',
+            'libffi-dev',
+        ],
+        'extra_requirements': [
+            'postgres', 'supervisor',
+        ],
+        'vars_required': [
+            'SECRET_KEY', 'DJANGO_SETTINGS_MODULE',
+            'DATABASE_NAME', 'DATABASE_HOST', 'DATABASE_PORT',
+            'DATABASE_USER', 'DATABASE_PASSWORD',
+        ],
+    },
+    'project:aim-front': {
+        'git_host': 'git@github.com',
+        'git_repo': 'JCAII/aim-front.git',
+        'ssh_project': 'aim-front',
+        'deploy_method': 'gulp',
+        'server': 'static',
+        'django_settings_module': 'aadts.settings',
+        'shell_env': {
+            'TERM': 'xterm',
+        },
+        'requirements': [
+            'nginx', 'git', 'ntp',
+            'nodejs',
+        ],
+        'extra_requirements': ['node6'],
+    },
+    'project:aim-flatstrip': {
+        'git_host': 'git@github.com',
+        'git_repo': 'JCAII/aim-flatstrip.git',
+        'ssh_project': 'flatstrip',
+        'python_version': 'python3.4',
+        'deploy_method': 'django',
+        'server': 'uwsgi',
+        'django_settings_module': 'flatstrip.settings',
+        'apps_path': 'src/',
+        'project_module': 'flatstrip',
+        'unmigrate': False,
+        'backup_state': False,
+        'shell_env': {
+            'DJANGO_SETTINGS_MODULE': 'flatstrip.settings',
+            'TERM': 'xterm',
+        },
+        'managed_processes': [
+            'webapp',
+        ],
+        'requirements': [
+            'nginx', 'git', 'ntp',
+            'redis-server',
+            'postgresql-client-9.3', 'postgresql-9.3',
+            'python3-all-dev', 'python-virtualenv',
+            'libxml2-dev', 'libxslt1-dev', 'libjpeg-dev', 'libpq-dev',
+            'libffi-dev',
+            'uwsgi', 'uwsgi-plugin-python3',
+        ],
+        'extra_requirements': [
+            'supervisor',
+        ],
+        'vars_required': [
+            'SECRET_KEY', 'DJANGO_SETTINGS_MODULE',
+            'DATABASE_NAME', 'DATABASE_HOST', 'DATABASE_PORT',
+            'DATABASE_USER', 'DATABASE_PASSWORD',
+        ],
+    },
+    'project:aim-summary': {
+        'git_host': 'git@github.com',
+        'git_repo': 'JCAII/aim-summary.git',
+        'default_branch': 'master',  # no develop
+        'ssh_project': 'aim-summary',
+        'python_version': 'python3.4',
+        'deploy_method': 'django',
+        'server': 'gunicorn',
+        'django_settings_module': 'summary.settings.base',
+        'apps_path': 'src/',
+        'project_module': 'summary',
+        'unmigrate': True,
+        'backup_state': False,
+        'shell_env': {
+            'DJANGO_SETTINGS_MODULE': 'summary.settings.base',
+            'TERM': 'xterm',
+        },
+        'managed_processes': [
+            'webapp', 'webapp-worker', 'webapp-beat',
+        ],
+        'requirements': [
+            'nginx', 'git', 'ntp',
+            'redis-server', 'postgresql-client-9.4', 'postgresql-9.4',
+            'python3-all-dev', 'python-virtualenv',
+            'libxml2-dev', 'libxslt1-dev', 'libjpeg-dev', 'libpq-dev',
+            'libffi-dev',
+        ],
+        'extra_requirements': [
+            'postgres', 'supervisor',
+        ],
+        'vars_required': [
+            'SECRET_KEY', 'DJANGO_SETTINGS_MODULE',
+            'DATABASE_NAME', 'DATABASE_HOST', 'DATABASE_PORT',
+            'DATABASE_USER', 'DATABASE_PASSWORD',
+            'ICELINK_DOMAIN', 'ICELINK_TO_SUMMARY_PASSWORD', 'ICELINK_TO_SUMMARY_USERNAME',
+            'SUMMARY_TO_ICELINK_TOKEN',
+        ],
+    },
+    'project:mfe': {
+        'git_host': 'git@github.com',
+        'git_repo': 'JCAII/ManualEntry.git',
+        'ssh_project': 'mfe',
+        'python_version': 'python3.4',
+        'deploy_method': 'django',
+        'server': 'uwsgi',
+        'django_settings_module': 'manual_entry.settings',
+        'apps_path': 'src/',
+        'project_module': 'manual_entry',
+        'unmigrate': False,
+        'backup_state': False,
+        'shell_env': {
+            'DJANGO_SETTINGS_MODULE': 'manual_entry.settings',
+            'TERM': 'xterm',
+        },
+        'managed_processes': [
+            'webapp', 'webapp-worker',
+        ],
+        'requirements': [
+            'nginx', 'git', 'ntp',
+            'redis-server',
+            'postgresql-client-9.3', 'postgresql-9.3',
+            'python3-all-dev', 'python-virtualenv',
+            'libxml2-dev', 'libxslt1-dev', 'libjpeg-dev', 'libpq-dev',
+            'libffi-dev',
+            'uwsgi', 'uwsgi-plugin-python3',
+        ],
+        'extra_requirements': [
+            'supervisor',
+        ],
+        'vars_required': [
+            'SECRET_KEY', 'DJANGO_SETTINGS_MODULE',
+            'DATABASE_NAME', 'DATABASE_HOST', 'DATABASE_PORT',
+            'DATABASE_USER', 'DATABASE_PASSWORD',
+        ],
+    },
+    'project:nap': {
+        'git_host': 'git@github.com',
+        'git_repo': 'netquity/nap.git',
+        'ssh_project': 'nap',
+        'python_version': 'python2.7',
+        'deploy_method': 'django',
+<<<<<<< HEAD
+=======
+        'default_branch': 'master',  # no develop
+>>>>>>> e750bf4c544efa89f75da2d0e5adba6a318ac213
+        'server': 'uwsgi',
+        'django_settings_module': 'nap.settings',
+        'apps_path': 'src/',
+        'project_module': 'nap',
+        'unmigrate': False,
+        'backup_state': False,
+<<<<<<< HEAD
+=======
+        'local_postgres': True,
+>>>>>>> e750bf4c544efa89f75da2d0e5adba6a318ac213
+        'shell_env': {
+            'DJANGO_SETTINGS_MODULE': 'nap.settings',
+            'TERM': 'xterm',
+        },
+        'managed_processes': [
+            'webapp',
+        ],
+        'requirements': [
+            'nginx', 'git', 'ntp',
+            'redis-server',
+<<<<<<< HEAD
+            'postgresql-client-9.1', 'postgresql-9.1',
+            'python-all-dev', 'python-virtualenv',
+            'libxml2-dev', 'libxslt1-dev', 'libjpeg-dev', 'libpq-dev',
+            'uwsgi', 'uwsgi-plugin-python',
+        ],
+        'extra_requirements': [
+            'supervisor',
+=======
+            'postgresql-client-9.4', 'postgresql-9.4',
+            'python-all-dev', 'python-virtualenv',
+            'libxml2-dev', 'libxslt1-dev', 'libjpeg-dev', 'libpq-dev',
+            'libffi-dev',
+            'uwsgi', 'uwsgi-plugin-python',
+        ],
+        'extra_requirements': [
+            'supervisor', 'postgres', 'nginx', 'python',
+>>>>>>> e750bf4c544efa89f75da2d0e5adba6a318ac213
+        ],
+    },
+    'project:infra': {
+        'web_user': None,  # Not true for all of them, actually.
+    },
+    'project:sentry': {
+        'web_user': 'sentry',
+    },
+    'project:registry': {
+        'ssh_project': 'registry',
+        'python_version': 'python3.4',
+        'deploy_method': 'docker-compose',
+        'web_user_groups': ['docker'],
+        'requirements': [
+            'nginx', 'ntp',
+            #'redis-server', 'git',  # not for now
+            'python3-all-dev', 'python-virtualenv',
+            'docker-engine',
+        ],
+        'extra_requirements': [
+            'docker', 'nginx',
+        ],
+    },
+    'type:prod': {
+        'default_branch': 'master',
+    },
+    'type:dev': {
+        'default_branch': 'develop',
+    },
+    'domain:icelinkapp': {
+        'ssl_domain': 'icelinkapp.com',
+        'use_ssl': True,
+    },
+    'domain:icelinkhub': {
+        'ssl_domain': 'icelinkhub.com',
+        'use_ssl': False,
+    },
+    'domain:netquity': {
+        'ssl_domain': 'netquity.com',
+        'use_ssl': True,
+    },
+}
+
+ROLES = {}
+REVERSEROLES = {}
+for host in HOSTGROUPS:
+    REVERSEROLES.setdefault(host, [])
+    groups = HOSTGROUPS[host]
+    project = None
+    hosttype = None
+    for group in groups:
+        if group.startswith('project'):
+            project = group.rsplit(':')[-1]
+        if group.startswith('type'):
+            hosttype = group.rsplit(':')[-1]
+    ROLES.setdefault('all/all', [])
+    ROLES['all/all'].append(host)
+    REVERSEROLES[host].append('all/all')
+    if project:
+        ROLES.setdefault(project + '/all', [])
+        ROLES[project + '/all'].append(host)
+        REVERSEROLES[host].append(project + '/all')
+    if hosttype:
+        ROLES.setdefault('all/' + hosttype, [])
+        ROLES['all/' + hosttype].append(host)
+        REVERSEROLES[host].append('all/' + hosttype)
+    if project and hosttype:
+        ROLES.setdefault(project + '/' + hosttype, [])
+        ROLES[project + '/' + hosttype].append(host)
+        REVERSEROLES[host].append(project + '/' + hosttype)
+
+
+def host_settings(host_string):
+    """Set host-specific settings."""
+    settings_dict = {}
+    if host_string in HOSTGROUPS:
+        for group in HOSTGROUPS[host_string]:
+            settings_dict.update(GROUPS[group])
+    if host_string in HOSTS:
+        settings_dict.update(HOSTS[host_string])
+    return settings_dict

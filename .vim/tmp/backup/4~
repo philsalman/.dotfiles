@@ -1,0 +1,26 @@
+# Uncomment this line to define a global platform for your project
+# platform :ios, '6.0'
+
+target 'Deicer' do
+
+pod 'Firebase', '~> 2.3.1'
+pod 'Reachability'
+pod 'JSONModel'
+pod 'MZFormSheetController', '~> 3.0.1'
+pod 'SVProgressHUD'
+pod 'MarqueeLabel'
+pod 'PaperTrailLumberjack', ''
+pod 'SDWebImage', '~>3.7'
+pod 'Fabric'
+pod 'Crashlytics'
+
+end
+
+target 'DeicerTests' do
+
+end
+
+target 'DeicerUITests' do
+
+end
+

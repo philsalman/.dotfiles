@@ -1,0 +1,11 @@
+#!/bin/sh
+
+BASE_DIR="$( cd -P "$( dirname "$0" )" && pwd )"
+
+cd $BASE_DIR
+
+export NEW_RELIC_CONFIG_FILE=$BASE_DIR/newrelic.ini
+
+. env/bin/activate
+
+exec newrelic-admin run-program uwsgi --ini uwsgi.ini $@

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en" class="app">
+<head>
+  <meta charset="utf-8" />
+  <title>Welcome | AIM</title>
+  <meta name="description" content="AIM" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+  <link rel="stylesheet" type="text/css" href="/assets/app.css">
+
+  <script>var iosDragDropShim = { enableEnterLeave: true }</script>
+
+  <script src="/assets/vendor.js"></script>
+  <script src="/assets/env.js"></script>
+  <script src="/assets/app.js"></script>
+
+  <link rel="icon" href="img/logo.png" type="image/x-icon" />
+</head>
+
+<body style="-webkit-print-color-adjust: exact;">
+
+  <script type=text/javascript>console.log(breakerbreaker)</script>
+  <!-- Authenticating splash screen -->
+  <div id="authenticating" class="bg-dark" style="position: absolute; width: 100%; height: 100%; z-index: 10101">
+    <div class="clearfix" style="height: 33%"></div>
+    <div class="text-center">
+      <div class="navbar-brand block">AIM</div>
+      <i class="fa fa-refresh fa-spin fa-3x" id="loading_icon"></i>
+      <h4>Authenticating...</h4>
+    </div>
+  </div>
+
+  <!-- Signout splash screen -->
+  <div id="signout" class="bg-dark" style="position: absolute; width: 100%; height: 100%; z-index: 10101; display: none">
+    <div class="clearfix" style="height: 33%"></div>
+    <div class="text-center">
+      <div class="navbar-brand block">AIM</div>
+      <i class="fa fa-lock fa-3x"></i>
+      <h4>You are signed out.</h4>
+      <div><a href="signin.html" class="btn btn-primary">Sign in</a></div>
+    </div>
+  </div>
+
+  <!-- Offline notification splash screen -->
+  <div id="offline" class="bg-dark" style="position: absolute; width: 100%; height: 100%; z-index: 10101; display: none">
+    <div class="clearfix" style="height: 33%"></div>
+    <div class="text-center">
+      <div class="navbar-brand block">AIM</div>
+      <i class="fa fa-power-off fa-3x"></i>
+      <h4>Your internet connection was lost.</h4>
+      <div><a href="javascript:history.go(0)" class="btn btn-primary">Reload</a></div>
+    </div>
+  </div>
+
+  <section class="vbox">
+    <header ng-controller="header" class="header navbar navbar-fixed-top-xs bg-dark" style="z-index: 101">
+
+      <div class="navbar-header">
+        <a href="" class="btn btn-link visible-xs" data-toggle="collapse" data-target="#navbar-nav">
+          <i class="fa fa-bars"></i>
+        </a>
+        <a href="" ng-click="fullscreen = !fullscreen" app-fullscreen="fullscreen" class="navbar-brand navbar-brand-spinner" id="fullscreen_toggle"><img src="img/logo.png" class="m-r-sm m-t" style="display: inline; height: 30px">Icelink&nbsp;&nbsp;&nbsp;<i class="fa fa-refresh fa-spin text-muted" ng-class="{'invisible': !spinner.show}" ng-cloack></i></a>
+        <a class="btn btn-link visible-xs" data-toggle="dropdown" data-target=".nav-user">
+          <i class="fa fa-cog"></i>
+        </a>
+      </div>
+
+      <div id="navbar-nav" class="collapse navbar-collapse box-shadow">
+        <ul ng-if="auth.hasPermission(['global'])" class="nav navbar-nav navbar-left navbar-condensed hidden-xs ng-cloak"><!-- hidden-sm -->
+          <li class="text-center">
+            <a href="#/global">
+              <div><i class="fa fa-globe fa-2x"></i></div>
+              <span class="small">Global</span>
+            </a>
+          </li>
+        </ul>
+
+        <ul ng-if="$root.airport" class="nav navbar-nav navbar-left navbar-condensed">
+          <li class="text-center" id="dispatch_tab"
+              ng-if="$root.airport && auth.hasPermission(['dispatch', 'global', 'station_admin'])"
+              ng-class="{'active': route.current.$$route.controller=='dispatch'}">
+            <a href="#/dispatch">
+              <div><i class="fa fa-headphones fa-2x"></i></div>
+              <span class="small hidden-sm">Dispatch</span><span class="small hidden-md visible-sm">DI</span>
+            </a>
+          </li>
+          <li class="text-center" id="pad_tab"
+              ng-if="$root.airport && auth.hasPermission(['pad'])"
+              ng-class="{'active': route.current.$$route.controller=='pad'}">
+            <a href="#/pad">
+              <div><i class="fa fa-tablet fa-2x"></i></div>
+              <span class="small hidden-sm">Pad</span><span class="small hidden-md visible-sm">PA</span>
+            </a>
+          </li>
+          <li class="text-center" id="dapm_tab"
+              ng-if="$root.airport && auth.hasPermission(['dispatch', 'global', 'station_admin'])"
+              ng-class="{'active': route.current.$$route.controller=='dapm'}">
+            <a href="#/dapm">
+              <div><i class="fa fa-plane fa-2x"></i></div>
+              <span class="small hidden-sm">Dashboard</span><span class="small hidden-md visible-sm">DA</span>
+            </a>
+          </li>
+          <li class="text-center" id="dslm_tab"
+              ng-if="$root.airport && auth.hasPermission(['dispatch', 'global', 'station_admin'])"
+              ng-class="{'active': route.current.$$route.controller=='dslm'}">
+            <a href="#/dslm">
+              <div><i class="fa fa-tint fa-2x"></i></div>
+              <span class="small hidden-sm">Reporting</span><span class="small hidden-md visible-sm">RE</span>
+            </a>
+          </li>
+        </ul>
+
+        <ul class="nav navbar-nav navbar-right nav-user">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="airport_tab">
+              <span class="thumb-xs avatar pull-left">
+                <img src="img/avatar.png">
+              </span>
+              <span ng-bind="::(user.view.first_name + '&nbsp;' + user.view.last_name || user.view.username) | truncate:11"></span> <b class="caret"></b>
+            </a>
+            <ul class="dropdown-menu animated fadeInRight">
+              <span class="arrow top"></span>
+              <li ng-class="{'active': route.current.$$route.controller == 'meSettings'}">
+                <a href="#/me" id="airport_settings">Settings</a>
+              </li>
+              <li ng-if="$root.airport && auth.hasPermission(['pilot'])" ng-class="{'active': route.current.$$route.controller == 'meAirline'}">
+                <a href="#/me/airline" id="airport_profile">Profile</a>
+              </li>
+              <li ng-if="$root.airport && auth.hasPermission(['XXX'])" ng-class="{'active': route.current.$$route.controller == 'meAirport'}">
+                <a href="#/me/airport" id="airport_profile">Profile</a>
+              </li>
+
+              <li ng-if="$root.airport && auth.hasPermission(['station_admin'])" ng-class="{'active': route.current.$$route.controller == 'meGroups'}">
+                <a href="#/me/groups" id="airport_groups">Groups</a>
+              </li>
+
+              <li ng-if="$root.airport && auth.hasPermission(['station_admin'])" ng-class="{'active': route.current.$$route.controller == 'mePersonnel'}">
+                <a href="#/me/users" id="airport_personnel">Personnel</a>
+              </li>
+              <li ng-if="$root.airport && auth.hasPermission(['station_admin'])" ng-class="{'active': route.current.$$route.controller == 'meVehicles'}">
+                <a href="#/me/vehicles" id="airport_vehicles">Vehicles</a>
+              </li>
+              <li ng-if="$root.airport && auth.hasPermission(['pilot'])" ng-class="{'active': route.current.$$route.controller == 'meAircrafts'}">
+                <a href="#/me/aircrafts" id="airport_aircrafts">Aircrafts</a>
+              </li>
+
+              <li class="divider"></li>
+
+              <li ng-if="$root.settings.data.environment">
+                <a href="" data-toggle="modal" data-target="#environmentModal" id="airport_environment">Environment</a>
+              </li>
+
+              <li>
+                <a ng-click="signout()" id="airport_logout">Logout</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+
+        <ul ng-if="$root.airport" class="nav navbar-nav navbar-right navbar-condensed hidden-xs ng-cloak"><!-- hidden-sm -->
+          <li class="text-center">
+            <a href="" class="dropdown-toggle" data-toggle="dropdown" id="oat_tab"
+               ng-class="{'disabled': !auth.hasPermission(['dispatch', 'pad'])}">
+              <div>
+                <i class="fa fa-2x"
+                   ng-bind="(forecast.data.item.view.formatted.temperature|number:1) + '&deg;'"
+                   ng-if="forecast.data.item.view.formatted.temperature || forecast.data.item.view.formatted.temperature === 0"></i>
+                <i class="fa fa-2x text-danger"
+                   ng-if="!forecast.data.item.view.formatted.temperature && forecast.data.item.view.formatted.temperature !== 0">_ _&deg;</i>
+              </div>
+              <span class="small" ng-bind="((airport.name|truncate:13) || 'Airport')"></span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-forecast animated fadeInRight" style="width: 350px;"
+                 ng-click="$event.stopPropagation();"
+                 ng-include="'views/includes/temperature-popup.html'"
+                 ng-init="airport=airport; forecast=forecast;"
+                 ng-if="forecast.data.item">
+            </div>
+          </li>
+          <li class="text-center">
+            <a href="" class="dropdown-toggle" data-toggle="dropdown" id="weather_condition_tab"
+               ng-class="{'disabled': !auth.hasPermission(['dispatch', 'pad'])}"
+               ng-click="weather.edit()">
+              <div><i class="wi {{config.weather.icons[weather.data.item.view.description] || 'wi-refresh'}}" style="font-size: 25.3px"></i></div>
+              <span class="small" ng-bind="((weather.data.item.view.description|truncate:10) || 'Weather')"></span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-weather animated fadeInRight" style="width: 350px;">
+              <span class="arrow top"></span>
+              <table class="table table-borderless-top m-b-none">
+                <tr>
+                  <td ng-repeat="description in ['Clear']" colspan="4" class="text-center">
+                    <a href="" ng-click="weather.data.item.edit.description = description; weather.set(weather.data.item.edit)" ng-attr-id="{{description.toLowerCase().replace(' ','_')}}">
+                      <span ng-class="{'text-info': description == weather.data.item.edit.description}">
+                        <h3 class="m-t-xs"><span class="wi {{config.weather.icons['Clear'] || 'wi-refresh'}}"></span></h3>
+                        <span ng-bind="description"></span>
+                      </span>
+                    </a>
+                  </td>
+                </tr>
+                <tr ng-repeat="row in ::config.weather.table">
+                  <td ng-repeat="description in row" class="text-center" width="25%">
+                    <a href="" ng-click="weather.data.item.edit.description = description; weather.set(weather.data.item.edit)" ng-attr-id="{{description.toLowerCase().replace(' ','_')}}">
+                      <span ng-class="{'text-info': description == weather.data.item.edit.description}">
+                        <h3 class="m-t-xs"><span class="wi {{config.weather.icons[description] || 'wi-refresh'}}"></span></h3>
+                        <span ng-bind="description"></span>
+                      </span>
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </li>
+          <li class="text-center">
+            <a href="" ng-click="treatment.edit()" class="dropdown-toggle" data-toggle="dropdown" id="treatment_tab">
+              <div><i class="fa fa-plane fa-2x text-warning"></i></div>
+              <span class="small" ng-bind="'Treatment'"></span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-treatment animated fadeInRight" style="width: 350px">
+              <span class="arrow top"></span>
+              <table class="table m-b-none">
+                <thead>
+                  <tr>
+                    <th width="50%">Surface</th><th width="25%">De-Ice</th><th width="25%">Anti-Ice</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    ng-repeat="surface in ::config.flightstrip.surfaceGroups"
+                    ng-init="
+                      isDeice = config.flightstrip.treatment.deice.indexOf(surface) > -1;
+                      isAntiice = config.flightstrip.treatment.antiice.indexOf(surface) > -1;
+                    "
+                  >
+                    <td ng-bind="surface"></td>
+                    <td ng-if="isDeice"
+                        ng-repeat="deice in [treatment.data.item.edit.deice]"
+                        ng-click="auth.hasPermission(['dispatch']) && (deice[surface] = !deice[surface])"
+                        ng-class="{'bg-warning': deice[surface]}"
+                        ng-attr-id="{{surface.toLowerCase()}}_deice"
+                        class="treatment treatment-deice text-center">
+                      <i class="fa" ng-class="{'fa-check': deice[surface], 'fa-times': !deice[surface]}"></i>
+                    </td>
+                    <td ng-if="!isDeice"></td>
+                    <td ng-if="isAntiice"
+                        ng-repeat="antiice in [treatment.data.item.edit.antiice]"
+                        ng-click="auth.hasPermission(['dispatch']) && (antiice[surface] = !antiice[surface])"
+                        ng-class="{'bg-success': antiice[surface]}"
+                        ng-attr-id="{{surface.toLowerCase()}}_anti_ice"
+                        class="treatment treatment-antiice text-center">
+                      <i class="fa" ng-class="{'fa-check': antiice[surface], 'fa-times': !antiice[surface]}"></i>
+                    </td>
+                    <td ng-if="!isAntiice"></td>
+                  </tr>
+                  <tr>
+                    <td colspan="3">
+                      <a href="" ng-class="{'disabled': !auth.hasPermission(['dispatch'])}" ng-click="treatment.set()" class="btn btn-primary btn-block" id="treatment_save">Save</a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <script>
+                $('.dropdown-menu.dropdown-menu-treatment').click(function(e) {
+                    var doClose = !$(e.target).hasClass('btn');
+                    doClose && e.stopPropagation();
+                });
+              </script>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+    </header>
+
+    <section>
+      <section class="hbox stretch">
+        <section class="vbox">
+            <section class="scrollable">
+
+              <!-- Page content -->
+              <div class="content padder {{$parent.route.controller}}" ng-view>
+              </div><!-- /.content -->
+
+            </section>
+          </section>
+        </section>
+    </section>
+
+    <span ng-repeat="item in [$root.settings.data.environment]" ng-include="'views/includes/environment-modal.html'"></span>
+
+  </section>
+
+</body>
+</html>

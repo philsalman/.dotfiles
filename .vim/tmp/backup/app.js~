@@ -1,0 +1,405 @@
+// (c) 2015Q2 / Savva Beloff / savvaoff@gmail.com / in sigularity we trust
+
+var hostname = window.location.hostname;
+
+var api = {
+  'localhost': {
+    backend: 'http://127.0.0.1:8000/api/dashboard/',
+    firebase: 'https://greatness-nothing.firebaseio.com/',
+  },
+  '127.0.0.1': {
+    backend: 'http://127.0.0.1:8000/api/dashboard/',
+    firebase: 'https://fiery-torch-1531.firebaseio.com/',
+  },
+  '172.17.0.1': {
+    backend: 'http://172.17.0.1:8000/api/dashboard/',
+    firebase: 'https://fiery-torch-1531.firebaseio.com/',
+  },
+  'icelinkapp.com': {
+    backend: 'https://apiprod.icelinkapp.com/api/dashboard/',
+    firebase: 'https://iceprod1.firebaseio.com/',
+  },
+  'deimos.icelinkapp.com': {
+    backend: 'https://apidei.icelinkapp.com/api/dashboard/',
+    firebase: 'https://deimos01-ice.firebaseio.com/',
+  },
+  'phobos.icelinkapp.com': {
+    backend: 'https://apipho.icelinkapp.com/api/dashboard/',
+    firebase: 'https://icepho1.firebaseio.com/',
+  },
+  'training.icelinkapp.com': {
+    backend: 'https://apitraining.icelinkapp.com/api/dashboard/',
+    firebase: 'https://icetraining1.firebaseio.com/',
+  },
+  'frontphobostest.icelinkapp.com': {
+    backend: 'https://phobostest.icelinkapp.com/api/dashboard/',
+    firebase: 'https://apiphobostest.firebaseio.com/',
+  },
+}
+
+var apiBase = api[hostname].backend
+  , apiTokenLabel = 'Authorization'
+  , apiTokenValue = function(token) { return 'Token ' + token; }
+  , apiAirportLabel = 'X-Airport'
+  , fireBase = api[hostname].firebase
+  , storageUser = 'user'
+  , storageToken = 'token'
+  , storagePreferences = 'preferences'
+
+var app = angular.module('app', ['ngRoute', 'ngSanitize', 'validator', 'validator.rules', 'ui.select', 'naturalSort', 'dndLists']); // , 'validator.rules'
+
+app.constant('appConfig', {
+  apiBase: apiBase,
+  apiTokenLabel: apiTokenLabel,
+  apiTokenValue: apiTokenValue,
+  apiAirportLabel: apiAirportLabel,
+  fireBase: fireBase,
+  storage: {
+    user: storageUser, // storage key for user data
+    token: storageToken, // storage key for token (lets keep it separately)
+    preferences: storagePreferences,
+  },
+  preferences: {
+  },
+  user: {
+    groups: {
+      values: {
+        MOBILE: 1,
+        DEICER: 2,
+        PILOT: 3,
+        BAYLEAD: 4,
+        DISPATCH: 5,
+        MANAGER: 6, // Company Admin
+        REPORTER: 7,
+        GLOBAL: 8,
+        PAD: 9,
+      },
+      labels: {
+        1: 'Mobile',
+        2: 'DeIcer',
+        3: 'Pilot',
+        4: 'BayLead',
+        5: 'Dispatch',
+        6: 'Manager',
+        7: 'Reporter',
+        8: 'Global',
+        9: 'Pad',
+      },
+      aliases: {
+        'mobile': 1,
+        'deicer': 2,
+        'pilot': 3,
+        'baylead': 4,
+        'dispatch': 5,
+        'manager': 6,
+        'reporter': 7,
+        'global': 8,
+        'pad': 9,
+      },
+    },
+    roles: {
+      'airline': 'Airline',
+      'service_provider': 'Service Provider',
+      'airport': 'Airport',
+    },
+    genders: {
+      'male': 'Male',
+      'female': 'Female',
+    },
+  },
+  weather: {
+    icons: {
+      'Clear': 'wi-day-sunny',
+      'Very Light Snow': 'wi-day-snow',
+      'Light Snow': 'wi-day-snow',
+      'Moderate Snow': 'wi-snow',
+      'Heavy Snow': 'wi-snow',
+      'Active Frost': 'wi-strong-wind',
+      'Hail': 'wi-day-hail',
+      'Freezing Fog': 'wi-night-cloudy-gusts',
+      'Freezing Drizzle': 'wi-night-sprinkle',
+      'Rain': 'wi-rain-mix',
+      'Ice Pellets': 'wi-night-storm-showers',
+      'Moderate Freezing Rain': 'wi-storm-showers',
+      'Heavy Freezing Rain': 'wi-thunderstorm',
+    },
+    table: [
+      ['Very Light Snow', 'Light Snow', 'Moderate Snow', 'Heavy Snow'],
+      ['Active Frost', 'Hail', 'Freezing Fog', 'Freezing Drizzle'],
+      ['Rain', 'Ice Pellets', 'Moderate Freezing Rain', 'Heavy Freezing Rain'],
+    ],
+  },
+  aircraft: {
+    conditions: {
+      'clean-aircraft': 'Clear Aircraft',
+      'light-snow': 'Light Snow',
+      'frost': 'Frost',
+      'clear-ice': 'Clear Ice',
+      'rime-ice': 'Rime Ice',
+      'moderate-snow': 'Moderate Snow',
+      'wet-snow': 'Wet Snow',
+      'heavy-snow': 'Heavy Snow',
+      'snow-and-ice': 'Snow And Ice',
+      'light-ice': 'Light Ice',
+    },
+    sizes: [ // aka icao sizes
+      'A',
+      'B',
+      'C',
+      'D',
+      'E',
+      'F',
+    ],
+  },
+  airport: {
+    locations: { // aka location types
+      values: {
+        GATE: 'gate',
+        CDF: 'cdf',
+        STAND: 'stand',
+        CDF_QUEUE: 'queue',
+        CDF_ICP: 'icp',
+        CDF_BAY: 'bay',
+        CDF_OCP: 'ocp',
+      },
+      labels: {
+        'gate': 'Gate',
+        'cdf': 'CDF',
+        'stand': 'Stand',
+        'queue': 'Queue',
+        'icp': 'ICP',
+        'bay': 'Bay',
+        'ocp': 'OCP',
+      },
+    },
+  },
+  flightstrip: {
+    surfaceGroups: [
+      'Radome',
+      'Fuselage',
+      'Wings',
+      'Vertical Stabilizer',
+      'Horizontal Stabilizer',
+      'Leading Edges',
+      'Undercarriage',
+      'Underwings',
+      'Engine Cowling',
+      'Propellers',
+      'Landing Gear',
+    ],
+    surfaces: {
+      'left-wing': 'Left Wing',
+      'right-wing': 'Right Wing',
+      'left-wing-leading-edge': 'Left Wing Leading Edge',
+      'right-wing-leading-edge': 'Right Wing Leading Edge',
+      'fuselage': 'Fuselage',
+      'left-horizontal-stabilizer': 'Left Horizontal Stabilizer',
+      'right-horizontal-stabilizer': 'Right Horizontal Stabilizer',
+      'left-stabilizer-leading-edge': 'Left Stabilizer Leading Edge',
+      'right-stabilizer-leading-edge': 'Right Stabilizer Leading Edge',
+      'vertical-stabilizer': 'Vertical Stabilizer',
+      'left-under-wing': 'Left Under Wing',
+      'right-under-wing': 'Right Under Wing',
+      'under-left-horizontal-stabilizer': 'Under Left Horizontal Stabilizer',
+      'under-right-horizontal-stabilizer': 'Under Right Horizontal Stabilizer',
+      'engine-cowling': 'Engine Cowling',
+      'radome': 'Radome',
+      'undercarriage': 'Undercarriage',
+      'propellers': 'Propellers',
+      'landing-gear': 'Landing Gear',
+    },
+    surfaces2groups: {
+      'left-wing': 'Wings',
+      'right-wing': 'Wings',
+      'left-wing-leading-edge': 'Leading Edges',
+      'right-wing-leading-edge': 'Leading Edges',
+      'fuselage': 'Fuselage',
+      'left-horizontal-stabilizer': 'Horizontal Stabilizer',
+      'right-horizontal-stabilizer': 'Horizontal Stabilizer',
+      'left-stabilizer-leading-edge': 'Leading Edges',
+      'right-stabilizer-leading-edge': 'Leading Edges',
+      'vertical-stabilizer': 'Vertical Stabilizer',
+      'left-under-wing': 'Underwings',
+      'right-under-wing': 'Underwings',
+      'under-left-horizontal-stabilizer': 'Underwings',
+      'under-right-horizontal-stabilizer': 'Underwings',
+      'engine-cowling': 'Engine Cowling',
+      'radome': 'Radome',
+      'undercarriage': 'Undercarriage',
+      'propellers': 'Propellers',
+      'landing-gear': 'Landing Gear',
+    },
+    treatment: {
+      deice: [ // available for de-icing
+        'Radome',
+        'Fuselage',
+        'Wings',
+        'Vertical Stabilizer',
+        'Horizontal Stabilizer',
+        'Leading Edges',
+        'Undercarriage',
+        'Underwings',
+        'Engine Cowling',
+        'Propellers',
+        'Landing Gear',
+      ],
+      antiice: [ // available for anti-icing
+        'Fuselage',
+        'Wings',
+        'Vertical Stabilizer',
+        'Horizontal Stabilizer',
+        'Leading Edges',
+      ],
+    },
+    inspections: {
+      'visual': 'Visual',
+      'tactile': 'Tactile',
+      'underwing': 'Underwing',
+      'other': 'Other',
+    },
+    colors: [
+      'yellow',
+      'red',
+      'orange',
+      'green',
+      'blue',
+    ],
+    events2colors: {
+      'assignment': 'yellow',
+      'aircraft-configured': 'red',
+      'brakes-set': 'red',
+      'de-icing-process': 'orange',
+      'anti-icing-process': 'green',
+      'treatment-complete': 'blue',
+    },
+  },
+  events: {
+    labels: {
+      'flight-strip': 'Flight Strip',
+      'queue': 'Queue',
+      'pad-assignment': 'Pad Assignment',
+      'pad-stop': 'Pad Stop',
+      'iceman-responsible': 'Iceman-Responsible',
+      'brakes-set': 'Brakes Set',
+      'aircraft-configured': 'Aircraft Configured',
+      'truck-movement': 'Truck Movement',
+      'truck-safe': 'Truck Safe',
+      'de-icing-process': 'De-Icing Process',
+      'anti-icing-process': 'Anti-Icing Process',
+      'override-treatment': 'Override Treatment',
+      'nozzle-close': 'Nozzle Close',
+      'treatment-complete': 'Treatment Complete',
+      'flight-strip-approval': 'Flight Strip Approval',
+      'sign-in': 'Sign In',
+      'hold-over-time': 'Hold Over Time',
+      'fluid-use': 'Fluid Use',
+      'assignment': 'Assignment',
+      'treatment': 'Treatment',
+      'aircraft-condition': 'Aircraft Condition',
+      'deicer-join': 'Deicer Join',
+      'inspection-complete': 'Inspection Complete',
+      'ctm-override': 'CTM Override',
+      'lead-remark': 'Lead Remark',
+      'crew-assignment': 'Crew Assignment',
+      'cdf-icp': 'CDF ICP',
+      'cdf-bay': 'CDF Bay',
+      'cdf-ocp': 'CDF OCP'
+    },
+    kinds: {
+      BEGIN: 'begin',
+      END: 'end',
+      ALONE: 'alone',
+      CANCEL: 'cancel',
+    },
+  },
+});
+
+
+app.run(['appBootstrap', function(appBootstrap) {
+
+  appBootstrap.init();
+
+}]);
+
+
+app.factory('appSpinnerInterceptor', ['$q', '$timeout', '$rootScope', function($q, $timeout, $rootScope) {
+  $rootScope.spinner = {counter: 0, show: false};
+
+  return {
+    'request': function(config) {
+      // show the spinner
+      $rootScope.spinner.counter++;
+      $rootScope.spinner.show = true;
+      return config || $q.when(config);
+    },
+    'response': function(response) {
+      // success: hide the spinner
+      $rootScope.spinner.counter--;
+      $timeout(function() {
+        !$rootScope.spinner.counter && ($rootScope.spinner.show = false);
+      }, 200);
+      return response || $q.when(response);
+    },
+   'responseError': function(rejection) {
+      // success: also hide the spinner
+      $rootScope.spinner.counter--;
+      $timeout(function() {
+        !$rootScope.spinner && ($rootScope.spinner.show = false);
+      }, 200);
+      return $q.reject(rejection);
+    }
+  };
+}]);
+
+
+app.factory('appHttpInterceptor', ['$q', 'appConfig', function($q, appConfig) {
+  return {
+    'request': function(config) {
+      // add trailing slash, django loves it
+      var url = config.url;
+      if (~url.indexOf(appConfig.apiBase) && url.charAt(url.length - 1) != '/' && url.indexOf('page') < 0) {
+        config.url += '/';
+      }
+
+      return config;
+    },
+
+    'response': function(response) {
+      // notify on logout (token expiration)
+      if (response.data && response.data.status == 401) {
+        angular.element('#signout').show();
+      }
+
+      // notify on maintenance
+      if (response.data && response.data.status == 503) {
+        angular.element('#maintenance').show();
+      }
+
+      // transform "soft" errors to rejects.
+      if (response.data && response.data.error) {
+        return $q.reject(response);
+      }
+
+      return response;
+    },
+
+   'responseError': function(rejection) {
+      // notify on maintenance
+      angular.element('#maintenance').show();
+
+      return $q.reject(rejection);
+    }
+
+  };
+}]);
+
+// TODO: refactor with custom angular modules $localStorage and etc
+Storage.prototype.setObject = function(key, value) {
+    this.setItem(key, JSON.stringify(value));
+}
+
+// TODO: refactor with custom angular modules $localStorage and etc
+Storage.prototype.getObject = function(key) {
+    var value = this.getItem(key);
+    return value ? JSON.parse(value) : value;
+}

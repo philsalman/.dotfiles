@@ -1,0 +1,462 @@
+import datetime
+import logging
+import os
+import shutil
+import StringIO
+import tempfile
+import hashlib
+import urllib2
+import json
+import pytz
+from rest_framework.viewsets import ViewSet
+import xhtml2pdf.pisa as pisa
+
+from django.conf import settings
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from django.utils.timezone import localtime
+from django.utils.translation import ugettext as __
+from django.utils.translation import ugettext_lazy as _
+
+from celery.result import AsyncResult
+from rest_framework import views, viewsets, status
+from rest_framework.decorators import detail_route, list_route
+from rest_framework.response import Response
+
+import serializers
+
+from aim.constants import FLUID_ANTI_ICE, FLUID_DE_ICE
+from aim.utils import cel_to_fahrenheit
+from airport.models import Airport
+from dashboard.permissions import IsAllowed, IsGlobal
+from dashboard.reports.forms import DslmFiltersForm
+from dashboard.views import DashboardAPIMixin
+from event.models import Event
+from fluid.models import FluidContract
+from job.models import FlightStrip, FluidUse
+from serviceprovider.models import Station
+from summary.api import SummaryAPI
+from vehicle.models import VehicleFluid
+
+logger = logging.getLogger(__name__)
+
+
+class ReportsDslmView(DashboardAPIMixin, views.APIView):
+    permission_classes = (IsAllowed,)
+
+    def get(self, request, format=None):
+        form = DslmFiltersForm(user=request.user, airport=self.get_airport(request), data=request.GET)
+
+        if not form.is_valid():
+            return Response({'errors': form.errors}, status.HTTP_400_BAD_REQUEST)
+
+        summary_filters = form.get_report_filters(exclude=('page', 'page_size', 'ordering', 'search'))
+        resp = SummaryAPI().get_dslm_stats(summary_filters.urlencode())
+        try:
+            return Response(resp.json().get('data'), resp.status_code)
+        except ValueError as exc:
+            logger.exception(
+                'Unable to serialize get_dslm_stats response contents to JSON.'
+            )
+            raise exc
+
+
+class ReportsDapmView(DashboardAPIMixin, views.APIView):
+    permission_classes = (IsAllowed,)
+
+    def get(self, request, format=None):
+        resp = SummaryAPI().get_dapm_data(self.get_airport(request), request.user.service_provider)
+
+        try:
+            if resp.status_code == 200:
+                data = resp.json().get('data')
+            else:
+                data = resp.json()
+        except ValueError as exc:
+            logger.exception(
+                'Unable to serialize get_dapm_stats response contents to JSON.'
+            )
+            raise exc
+
+        return Response(data, resp.status_code)
+
+
+class ReportsOperationViewSet(DashboardAPIMixin, ViewSet):
+    permission_classes = (IsAllowed,)
+
+    def list(self, request, *args, **kwargs):
+        form = DslmFiltersForm(user=request.user, airport=self.get_airport(request), data=request.GET)
+
+        if not form.is_valid():
+            return Response({'error': {'errors': form.errors}}, status.HTTP_400_BAD_REQUEST)
+
+        resp = SummaryAPI().get_dslm_list(form.get_report_filters().urlencode())
+
+        try:
+            if resp.status_code == 200:
+                data = resp.json().get('data')
+            else:
+                data = resp.json()
+        except ValueError as exc:
+            logger.exception(
+                'Unable to serialize get_dslm_list response contents to JSON.'
+            )
+            raise exc
+
+        return Response(data, resp.status_code)
+
+    @detail_route()
+    def crews(self, request, pk):
+        # filter form here creates filters by airport and service_provider etc depends on user rights
+        form = DslmFiltersForm(user=request.user, airport=self.get_airport(request), data=request.GET)
+
+        if not form.is_valid():
+            return Response({'error': {'errors': form.errors}}, status.HTTP_400_BAD_REQUEST)
+        summary_filters = form.get_report_filters(exclude=('page', 'page_size', 'ordering', 'search', 'start', 'end'))
+
+<<<<<<< HEAD
+        data, status_code = get_dslm_crews(pk, summary_filters.urlencode())
+        airport = self.get_airport(self.request)
+        if airport.convert_to_gallons:
+            # TODO: We should get frontend to handle conversion, eventually
+            for crew in data['data']:
+                if crew.get('antiice_volume'):
+                    crew['antiice_volume'] = airport.convert_fluid(
+                        crew['antiice_volume'],
+                        from_litres=True,  # TODO: expects litres from summary
+                    )
+                if crew.get('deice_volume'):
+                    crew['deice_volume'] = airport.convert_fluid(
+                        crew['deice_volume'],
+                        from_litres=True,  # TODO: expects litres from summary
+                    )
+        if status_code == 200:
+            data = data.get('data')
+        return Response(data, status_code)
+=======
+        resp = SummaryAPI().get_dslm_crews(pk, summary_filters.urlencode())
+        try:
+            if resp.status_code == 200:
+                data = resp.json().get('data')
+            else:
+                data = resp.json()
+        except ValueError as exc:
+            logger.exception(
+                'Unable to serialize get_dslm_crews response contents to JSON.'
+            )
+            raise exc
+
+        return Response(data, resp.status_code)
+>>>>>>> 2d23294dfdcf5b4cfbcb822fa682f23633642594
+
+    @list_route()
+    def check_xls_status(self, request):
+        res = AsyncResult(request.GET.get('task_id').strip('/'))
+        result = {'complete': False}
+        if res.state == 'SUCCESS' and res.result:
+            url = res.result
+            if not url.startswith('http'):  # in case we use default FileSystemStorage it's important to return full url
+                url = '{protocol}://{host}{url}'.format(
+                    protocol='https' if request.is_secure() else 'http',
+                    host=request.get_host(),
+                    url=url
+                )
+            result = {'complete': True, 'result': url}
+
+        return HttpResponse(json.dumps(result), content_type="application/json; charset=utf-8")
+
+    @list_route()
+    def xls(self, request):
+        from dashboard.tasks import render_xls_report
+
+        airport = self.get_airport(self.request)
+        station = Station.objects.get_or_create(service_provider=request.user.service_provider, airport=airport)[0]
+
+        form = DslmFiltersForm(user=request.user, airport=self.get_airport(request), data=request.GET)
+        if not form.is_valid():
+            return Response({'error': {'errors': form.errors}}, status.HTTP_400_BAD_REQUEST)
+
+        resp = SummaryAPI().get_dslm_ids(form.get_report_filters(exclude=('page', 'page_size')).urlencode())
+        if resp.status_code == 200:
+            try:
+                report_task = render_xls_report.delay(station.pk, [d['internal_id'] for d in resp.json().get('data', {})])
+                return HttpResponse(json.dumps({'task_id': report_task.task_id}),
+                                    content_type="application/json; charset=utf-8")
+            except ValueError as exc:
+                logger.exception(
+                    'Unable to serialize get_dslm_ids response contents to JSON.'
+                )
+                raise exc
+        else:
+            try:
+                return Response(resp.json(), resp.status_code)
+            except ValueError as exc:
+                logger.exception(
+                    'Unable to serialize get_dslm_ids response contents to JSON.'
+                )
+                raise exc
+
+
+class PdfReportView(DashboardAPIMixin, viewsets.ReadOnlyModelViewSet):
+    queryset = FlightStrip.objects.all().distinct().treatments_done()
+
+    def get_queryset(self):
+        queryset = (
+            super(PdfReportView, self)
+            .get_queryset()
+            .select_related(
+                'flight', 'service_location',
+                'flight__aircraft', 'flight__aircraft__type', 'flight__airline',
+                'weather',
+            )
+            #.exclude_approved()
+        )
+
+        queryset = queryset.filter(flight__airport=self.get_airport(self.request))
+        if self.request.user.service_provider_id:
+            queryset = queryset.filter(events__event_assignment__service_provider=self.request.user.service_provider)
+
+        return queryset
+
+    def retrieve(self, request, *args, **kwargs):
+        template_name = 'flightstrip_pdf_report.html'
+
+        def get_truck_usages(airport, flightstrip):
+            trucks = []
+            crew_usages = flightstrip.total_fluid_usages_group_by_crew
+            for crew in flightstrip.related_crews.select_related('airport_vehicle__vehicle'):
+                usage = crew_usages.get(crew.pk) or []
+                fluid_uses = {FLUID_DE_ICE: 0, FLUID_ANTI_ICE: 0}
+                fluid_uses.update({item['spray']: float(item['total_volume_gross']) for item in usage})
+
+                if airport.convert_to_gallons:
+                    fluid_uses = {fluid_type: round(airport.convert_fluid(val, from_litres=True)) for (fluid_type, val) in fluid_uses.items()}
+
+                truck = {
+                    "truck_name": crew.airport_vehicle.nickname,
+                    "crew": crew,
+                    "de_ice": fluid_uses[FLUID_DE_ICE],
+                    "de_ice_p": "{0:.2f}%".format(flightstrip.concentration_deice(crew=crew)),
+                    "anti_ice": fluid_uses[FLUID_ANTI_ICE],
+                    "anti_ice_p": "{0:.2f}%".format(flightstrip.concentration_antiice(crew=crew)),
+                    "quadrants": flightstrip.get_crew_quadrants(crew.pk)
+                }
+
+                try:
+                    fluid_use_deicing = flightstrip.related_fluid_uses \
+                        .filter(fluid_type=FLUID_DE_ICE) \
+                        .latest('event__time_server_start')
+
+                    vehicle_fluid_deicing = fluid_use_deicing.vehicle_fluid
+
+                    truck['de_ice_brix'] = u"{0:.2f}".format(vehicle_fluid_deicing.brix) \
+                        if vehicle_fluid_deicing.brix else None
+                    if vehicle_fluid_deicing.lout and airport.convert_to_fahrenheit:
+                        truck['de_ice_lout'] = u"{0:.2f}F".format(cel_to_fahrenheit(vehicle_fluid_deicing.lout))
+                    elif vehicle_fluid_deicing.lout:
+                        truck['de_ice_lout'] = u"{0:.2f}C".format(vehicle_fluid_deicing.lout)
+                    else:
+                        truck['de_ice_lout'] = None
+                except (VehicleFluid.DoesNotExist, FluidUse.DoesNotExist):
+                    pass
+
+                try:
+                    fluid_use_antiicing = flightstrip.related_fluid_uses \
+                        .filter(fluid_type=FLUID_ANTI_ICE) \
+                        .latest('event__time_server_start')
+
+                    vehicle_fluid_antiicing = fluid_use_antiicing.vehicle_fluid
+
+                    truck['anti_ice_brix'] = u"{0:.2f}".format(vehicle_fluid_antiicing.brix) \
+                        if vehicle_fluid_antiicing.brix else None
+                    if vehicle_fluid_antiicing.lout and airport.convert_to_fahrenheit:
+                        truck['anti_ice_lout'] = u"{0:.2f}F".format(cel_to_fahrenheit(vehicle_fluid_antiicing.lout))
+                    elif vehicle_fluid_antiicing.lout:
+                        truck['anti_ice_lout'] = u"{0:.2f}C".format(vehicle_fluid_antiicing.lout)
+                    else:
+                        truck['anti_ice_lout'] = None
+                except (VehicleFluid.DoesNotExist, FluidUse.DoesNotExist):
+                    pass
+
+                trucks.append(truck)
+            return trucks
+
+        airport = self.get_airport(self.request)
+        service_provider = request.user.service_provider
+        station = Station.objects.get_or_create(
+            service_provider=service_provider, airport=airport)[0]
+        flightstrip = self.get_object()
+
+        data = {}
+
+        deice_treatment_start = flightstrip.events.filter(
+            label=Event.LABEL_DE_ICING_PROCESS
+        ).earliest_client_start_or_none()
+
+        antiice_treatment_start = flightstrip.events.filter(
+            label=Event.LABEL_ANTI_ICING_PROCESS
+        ).earliest_client_start_or_none()
+
+        end_treatment_time = flightstrip.events.filter(
+            label=Event.LABEL_DEICER_JOIN
+        ).latest_client_end_or_none()
+
+        hold_over_start = flightstrip.events.filter(
+            label=Event.LABEL_HOLD_OVER_TIME
+        ).latest_client_start_or_none() or flightstrip.hold_over_time
+
+        inspection_request = flightstrip.inspection_request
+        inspection_time = flightstrip.events.filter(
+            label=flightstrip.events.model.LABEL_INSPECTION_COMPLETE
+        ).latest_client_start_or_none()
+
+        operation_type = ''
+        if deice_treatment_start and not hold_over_start:
+            operation_type = 'Deice only'
+        elif deice_treatment_start and hold_over_start and not antiice_treatment_start:
+            operation_type = 'One Step process: Deice and Anti-ice'
+        elif deice_treatment_start and antiice_treatment_start:
+            operation_type = 'Two step Process: Deice and Anti-ice'
+
+        temperature = None
+        if flightstrip.airport_temperature is not None:
+            if airport.convert_to_fahrenheit:
+                temperature = u'%sF' % cel_to_fahrenheit(flightstrip.airport_temperature)
+            else:
+                temperature = u'%sC' % flightstrip.airport_temperature
+
+        try:
+            antiice_fluid_brand = station.fluid_contracts \
+                .filter(fluid_brand__fluid_type=FLUID_ANTI_ICE) \
+                .latest().fluid_brand.brand
+        except FluidContract.DoesNotExist:
+            antiice_fluid_brand = None
+
+        try:
+            deice_fluid_brand = station.fluid_contracts \
+                .filter(fluid_brand__fluid_type=FLUID_DE_ICE) \
+                .latest().fluid_brand.brand
+        except FluidContract.DoesNotExist:
+            deice_fluid_brand = None
+
+        timezone = pytz.timezone(flightstrip.flight.airport.timezone)
+
+        data.update({
+            'STATIC_ROOT': settings.STATIC_ROOT,
+            'airport_timezone': timezone,
+            'domain': ('https://' if self.request.is_secure() else 'http://') + self.request.get_host(),
+            'flightstrip': flightstrip,
+            'service_provider': flightstrip.assigned_service_provider,
+            'airport': flightstrip.flight.airport,
+            'aircraft': flightstrip.flight.aircraft,
+            'weather_condition': flightstrip.weather.description if flightstrip.weather else '',
+            'temperature': temperature,
+            'deice_treatment_start': localtime(deice_treatment_start) if deice_treatment_start else None,
+            'antiice_treatment_start': localtime(antiice_treatment_start) if antiice_treatment_start else None,
+            'end_treatment_time': localtime(end_treatment_time) if end_treatment_time else None,
+            'hold_over_start': localtime(hold_over_start) if hold_over_start else None,
+            'inspection_request': inspection_request,
+            'inspection_time': localtime(inspection_time) if inspection_time else None,
+            'surface_groups_deice': flightstrip.get_treated_surfaces_list(FLUID_DE_ICE),
+            'surface_groups_antiice': flightstrip.get_treated_surfaces_list(FLUID_ANTI_ICE),
+            'trucks': get_truck_usages(airport, flightstrip),
+            'cur_year': localtime(datetime.datetime.today().replace(tzinfo=flightstrip.datetime.tzinfo)).year,
+            'antiice_fluid_brand': antiice_fluid_brand,
+            'deice_fluid_brand': deice_fluid_brand,
+            'operation_type': operation_type,
+            'treatment_time': format_seconds(flightstrip.treatment_time()),
+            'line_up_time': format_seconds(flightstrip.get_line_up_time()),
+            'station': station
+        })
+
+        def render_to_pdf(context):
+            """
+            Renders pdf file with given context
+            """
+            html = render_to_string(template_name, context)
+            result = StringIO.StringIO()
+            tmp_dir = tempfile.mkdtemp()
+            pdf_css_file = open(
+                os.path.join(settings.PROJECT_ROOT, 'src/aim/static/css/xhtml2pdf-default.css'), 'r'
+            )
+
+            def fetch_resources(dir, uri, rel):
+                if uri.startswith(settings.STATIC_ROOT):
+                    return uri
+                elif not uri.startswith('http'):
+                    return '{0}{1}'.format(settings.PROJECT_ROOT, uri)
+
+                data_hash = hashlib.md5()
+                data_hash.update(uri)
+                filepath = os.path.join(dir, data_hash.hexdigest())
+                file = open(filepath, 'wb')
+                res = urllib2.urlopen(uri)
+                if res.code != 200:
+                    return ''
+                file.write(res.read())
+                file.close()
+                return filepath
+
+            pisa.pisaDocument(
+                src=StringIO.StringIO(html.encode("UTF-8")),
+                dest=result,
+                path='http://{0}{1}'.format(data['domain'], settings.STATIC_URL),
+                link_callback=lambda uri, rel: fetch_resources(tmp_dir, uri, rel),
+                debug=settings.DEBUG,
+                default_css=pdf_css_file.read(),
+                # xhtml=True,
+                encoding='UTF-8'
+            )
+            pdf_css_file.close()
+            shutil.rmtree(tmp_dir)
+            return result.getvalue()
+
+        response = HttpResponse(render_to_pdf(data), content_type='application/pdf')
+        # uncoment line below for forcing file save in browser
+        # response['Content-Disposition'] = 'attachment; filename=%s' % response_filename
+        return response
+
+
+class ReportsAirportViewSet(DashboardAPIMixin, viewsets.ReadOnlyModelViewSet):
+    permission_classes = (IsGlobal,)
+    queryset = Airport.objects.all().distinct()
+    serializer_class = serializers.ReportsAirportSerializer
+    ordering_fields = (
+        'name', 'icao_code',
+    )
+    search_fields = ('',)
+
+    def get_queryset(self):
+        qs = super(ReportsAirportViewSet, self).get_queryset()
+        user = self.request.user
+
+        qs = (qs
+            .filter(airport_service_providers__service_provider=user.service_provider)
+            .defer('managers')
+        )
+
+        return qs
+
+    @detail_route()
+    def monitor(self, request, pk=None):
+        airport = self.get_object()
+        context = self.get_serializer_context()
+
+        data = serializers.ReportsAirportMonitorSerializer(
+            airport,
+            context=context,
+        ).data
+
+        return Response(data)
+
+
+def format_seconds(seconds):
+    if seconds:
+        return "{0}{1:01.0f}:{2:02.0f}:{3:02.0f}".format(
+            '-' if seconds < 0 else '',
+            abs(seconds / 3600),
+            abs(seconds % 3600 / 60),
+            abs(seconds % 60)
+        )
+    else:
+        return ''

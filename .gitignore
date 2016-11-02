@@ -1,0 +1,14 @@
+#############################
+# .dotfiles gitignore rules #
+#############################
+#Owner:David Salman
+
+# OSX files
+.DS_Store
+
+# History Files
+.lesshst
+.bash_history
+.node_repl_history
+.psql_history
+.logs/

@@ -1,0 +1,77 @@
+# .bash_profile
+# Aurthor: David Salman <phil@netquity.com>
+# Source: 
+# Complied from a variety of different sources and developers. This is the revised version.
+
+############################
+# Postgres SQL environment #
+############################
+# path exports for postgres sql server. required to deploy back-end.
+export path="/usr/local/bin:/usr/local/sbin:~/bin:$path"
+# path for postgress version 9.5 binaries
+path="/applications/postgres.app/contents/versions/9.5/bin:$path"
+
+###########################
+#  Sauce Labs environment #
+###########################
+export SAUCE_USERNAME=philipsalman
+export SAUCE_ACCESS_KEY=eea8de58-20a2-4587-bb73-a2d4093754fb
+
+########################
+# Homebrew environment #
+########################
+# add homebrew `/usr/local/bin` and user `~/bin` to the `$path`
+PATH=/usr/local/bin:$PATH
+PATH=$HOME/bin:$PATH
+export PATH
+
+########################
+# Pip/gPip environment #
+########################
+# Pip's virtual environment flag
+export PIP_REQUIRE_VIRTUALENV=false
+# Using pip's global function
+gpip(){
+   PIP_REQUIRE_VIRTUALENV="" pip "$@"
+ }
+# Load the shell dotfiles, and then some:
+# * ~/.path can be used to extend `$PATH`.
+# * ~/.extra can be used for other settings you don’t want to commit.
+for file in ~/.{path,bash_prompt,exports,aliases,functions,extra}; do
+  [ -r "$file" ] && source "$file"
+done
+unset file
+
+########################
+# Save command history #
+# ######################
+# Saves all your commands to a file in your ~/.logs/ folder.
+export PROMPT_COMMAND='if [ "$(id -u)" -ne 0 ]; then echo "$(date "+%Y-%m-%d.%H:%M:%S") $(pwd) $(history 1)" >> ~/.logs/bash-history-$(date "+%Y-%m-%d").log; fi'
+
+#######################
+# Directory shortcuts #
+#######################
+alias front-end="cd /Users/davidsalman/Documents/JCAII/aim-front"
+alias back-end="cd /Users/davidsalman/Documents/JCAII/aim-web"
+alias aa-dts="cd /Users/davidsalman/Documents/JCAII/aa-dts"
+alias fabfile="cd /Users/davidsalman/Documents/JCAII/fabfile"
+alias flatstrip="cd /Users/davidsalman/Documents/JCAII/aim-flatstrip"
+alias MFE="cd /Users/davidsalman/Documents/JCAII/ManualEntry"
+alias summary="cd /Users/davidsalman/Documents/JCAII/aim-summary"
+alias key="cd /Users/davidsalman/Documents/JCAII/keymaster"
+alias keymaster="cd /Users/davidsalman/Documents/Netquity/keymaster"
+alias pilot="cd /Users/davidsalman/Documents/Netquity/net-pilot"
+alias net-deicer="cd /Users/davidsalman/Documents/Netquity/net-deicer"
+alias net-jbt="cd /Users/davidsalman/Documents/Netquity/net-jbt"
+alias nap="cd /Users/davidsalman/Documents/Netquity/nap"
+alias netquity="cd /Users/davidsalman/Documents/Netquity/netquity"
+alias aim-deicer="cd /Users/davidsalman/Documents/Netquity/aim-deicer"
+alias tia-web="cd /Users/davidsalman/Documents/Netquity/tia-web-py"
+alias tia-rep="cd /Users/davidsalman/Documents/Netquity/tai-rep"
+alias tai-cmty="cd /Users/davidsalman/Documents/Netquity/tai-cmty"
+
+#####################
+# Command shortcuts #
+#####################
+alias ll="ls -AltrhG"
+alias lh="ls -alHG"
